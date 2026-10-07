@@ -1,0 +1,27 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: mypy-course-service
+        name: mypy (course-service)
+        entry: bash -c 'cd course-service && uv run mypy'
+        language: system
+        pass_filenames: false
+        files: ^course-service/
+        types: [ python ]
+
+  - repo: local
+    hooks:
+      - id: pytest-course-service
+        name: pytest (course-service)
+        entry: bash -c 'cd course-service && uv run pytest'
+        language: system
+        pass_filenames: false
+        files: ^course-service/
+        stages: [ pre-push ]

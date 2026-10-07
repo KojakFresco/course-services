@@ -8,7 +8,10 @@ class AppSettings(BaseSettings):
     title: str = "Course service title"
     description: str = "Course service description"
     summary: str = "Course service summary"
-    # TODO: ...
+    version: str = "0.1.0"
+    debug: bool = False
+    docs_url: str | None = "/docs"
+    openapi_url: str | None = "/openapi.json"
 
 
 @final
@@ -16,8 +19,10 @@ class Settings(BaseSettings):
     app: AppSettings
 
     model_config = SettingsConfigDict(
-        extra="allow", env_file=".env",
-        env_nested_delimiter="__", env_file_encoding="utf-8",
+        extra="allow",
+        env_file=".env",
+        env_nested_delimiter="__",
+        env_file_encoding="utf-8",
     )
 
 

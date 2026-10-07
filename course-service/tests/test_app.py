@@ -3,10 +3,7 @@ import pytest
 
 @pytest.mark.parametrize(
     "url_path,status,response_json",
-    (
-            ("/", 404, {"detail": "Not Found"}),
-            ("/service", 200, {"healthy": True})
-    )
+    (("/", 404, {"detail": "Not Found"}), ("/service", 200, {"healthy": True})),
 )
 def test_get(app_client, url_path, status, response_json):
     response = app_client.get(url_path)

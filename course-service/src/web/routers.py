@@ -8,17 +8,12 @@ from src.web.schemas import ServiceInfo
 
 logger = logging.getLogger(__name__)
 service_router = APIRouter(
-    prefix="/service",
-    lifespan=lifespan_service_router,
-    tags=["service"]
+    prefix="/service", lifespan=lifespan_service_router, tags=["service"]
 )
 
 
 @service_router.get(
-    "/",
-    description="Service info route",
-    response_model=ServiceInfo,
-    status_code=200
+    "/", description="Service info route", response_model=ServiceInfo, status_code=200
 )
 def info() -> ServiceInfo:
     return get_service_info()

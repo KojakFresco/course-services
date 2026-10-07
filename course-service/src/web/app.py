@@ -15,7 +15,9 @@ class FastAPIParams(TypedDict, total=False):
     lifespan: Lifespan[FastAPI]
 
 
-def create_app(settings: Settings, routers: Sequence[APIRouter], **params: Unpack[FastAPIParams]) -> FastAPI:
+def create_app(
+    settings: Settings, routers: Sequence[APIRouter], **params: Unpack[FastAPIParams]
+) -> FastAPI:
     app_params = {**settings.app.model_dump(), **params}
     app = FastAPI(**app_params)
     for router in routers:
