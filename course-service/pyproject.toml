@@ -1,0 +1,72 @@
+[project]
+name = "course-service"
+version = "0.1.0"
+description = "Course service description"
+readme = "README.md"
+requires-python = ">=3.12"
+
+[dependency-groups]
+dev = [
+    "sqlalchemy>=2.1.1",
+    "uvicorn>=0.54.0",
+    "alembic>=1.20.0",
+    "pyyaml>=6.0.3",
+    "pydantic>=2.13.5",
+    "fastapi>=0.141.1",
+    "starlette>=1.7.0",
+    "pydantic-settings>=2.15.0",
+    { include-group = "test" },
+    { include-group = "lint" },
+]
+test = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "httpx2>=2.13.1",
+    "locust>=2.46.6",
+    "aiosqlite>=0.22.1",
+]
+lint = [
+    "radon>=6.0.1",
+    "ruff>=0.16.9",
+    "pylint>=4.0.9",
+    "black>=26.5.1",
+    "isort>=9.0.1",
+    "mypy>=2.3.1",
+    "types-pyyaml>=6.0.12.20260906",
+]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov=src",
+    "--cov-branch",
+    "--cov-report=term-missing",
+    "-q",
+]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+parallel = true
+omit = ["*/__init__.py", "*/main.py", "src/task_platform/protocols.py", "*/api_server.py"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
+
+[tool.ruff.lint]
+fixable = ["I", "UP", "F401"]
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "tests.conftest"
+disallow_untyped_defs = false
