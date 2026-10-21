@@ -1,4 +1,3 @@
-import logging
 import logging.config
 
 import yaml
@@ -11,7 +10,7 @@ from src.web.routers import service_router
 logger = logging.getLogger(__name__)
 
 if __name__ == "src.main":
-    with open("log-config.yaml", "r", encoding="UTF-8") as f:
+    with open("log-config.yaml", encoding="UTF-8") as f:
         log_config = yaml.safe_load(f)
         logging.config.dictConfig(log_config)
     settings = get_settings()

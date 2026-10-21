@@ -4,11 +4,9 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, Union
 from uuid import UUID
 
 from fastapi import FastAPI, Header
-
 from models import (
     ApiV1AssignmentsGetResponse,
     ApiV1CoursesGetResponse,
@@ -47,8 +45,8 @@ app = FastAPI(
     tags=["Assignments"],
 )
 def list_assignments(
-    offset: Optional[int] = 0, limit: Optional[int] = 10
-) -> Union[ApiV1AssignmentsGetResponse, ErrorResponse]:
+    offset: int | None = 0, limit: int | None = 10
+) -> ApiV1AssignmentsGetResponse | ErrorResponse:
     """Получить список заданий"""
     pass
 
@@ -65,9 +63,9 @@ def list_assignments(
     tags=["Assignments"],
 )
 def create_assignment(
-    idempotency__key: UUID = Header(..., alias="Idempotency-Key"),
+    idempotency_key: UUID = Header(..., alias="Idempotency-Key"),
     body: AssignmentCreate = ...,
-) -> Union[Assignment, ErrorResponse]:
+) -> Assignment | ErrorResponse:
     """Создать новое задание"""
     pass
 
@@ -78,7 +76,7 @@ def create_assignment(
     responses={"401": {"model": ErrorResponse}, "404": {"model": ErrorResponse}},
     tags=["Assignments"],
 )
-def get_assignment(id: UUID) -> Union[Assignment, ErrorResponse]:
+def get_assignment(id: UUID) -> Assignment | ErrorResponse:
     """Получить задание по ID"""
     pass
 
@@ -96,7 +94,7 @@ def get_assignment(id: UUID) -> Union[Assignment, ErrorResponse]:
 )
 def update_assignment(
     id: UUID, body: AssignmentUpdate = ...
-) -> Union[Assignment, ErrorResponse]:
+) -> Assignment | ErrorResponse:
     """Частично обновить задание"""
     pass
 
@@ -112,7 +110,7 @@ def update_assignment(
     },
     tags=["Assignments"],
 )
-def delete_assignment(id: UUID) -> Optional[ErrorResponse]:
+def delete_assignment(id: UUID) -> ErrorResponse | None:
     """Удалить задание"""
     pass
 
@@ -129,8 +127,8 @@ def delete_assignment(id: UUID) -> Optional[ErrorResponse]:
     tags=["Courses"],
 )
 def list_courses(
-    offset: Optional[int] = 0, limit: Optional[int] = 10
-) -> Union[ApiV1CoursesGetResponse, ErrorResponse]:
+    offset: int | None = 0, limit: int | None = 10
+) -> ApiV1CoursesGetResponse | ErrorResponse:
     """Получить список курсов"""
     pass
 
@@ -147,9 +145,9 @@ def list_courses(
     tags=["Courses"],
 )
 def create_course(
-    idempotency__key: UUID = Header(..., alias="Idempotency-Key"),
+    idempotency_key: UUID = Header(..., alias="Idempotency-Key"),
     body: CourseCreate = ...,
-) -> Union[Course, ErrorResponse]:
+) -> Course | ErrorResponse:
     """Создать новый курс"""
     pass
 
@@ -160,7 +158,7 @@ def create_course(
     responses={"401": {"model": ErrorResponse}, "404": {"model": ErrorResponse}},
     tags=["Courses"],
 )
-def get_course(id: UUID) -> Union[Course, ErrorResponse]:
+def get_course(id: UUID) -> Course | ErrorResponse:
     """Получить курс по ID"""
     pass
 
@@ -176,7 +174,7 @@ def get_course(id: UUID) -> Union[Course, ErrorResponse]:
     },
     tags=["Courses"],
 )
-def update_course(id: UUID, body: CourseUpdate = ...) -> Union[Course, ErrorResponse]:
+def update_course(id: UUID, body: CourseUpdate = ...) -> Course | ErrorResponse:
     """Частично обновить курс"""
     pass
 
@@ -192,7 +190,7 @@ def update_course(id: UUID, body: CourseUpdate = ...) -> Union[Course, ErrorResp
     },
     tags=["Courses"],
 )
-def delete_course(id: UUID) -> Optional[ErrorResponse]:
+def delete_course(id: UUID) -> ErrorResponse | None:
     """Удалить курс"""
     pass
 
@@ -214,9 +212,9 @@ def delete_course(id: UUID) -> Optional[ErrorResponse]:
     tags=["Submissions"],
 )
 def create_submission(
-    idempotency__key: UUID = Header(..., alias="Idempotency-Key"),
+    idempotency_key: UUID = Header(..., alias="Idempotency-Key"),
     body: SubmissionCreate = ...,
-) -> Union[Submission, ErrorResponse]:
+) -> Submission | ErrorResponse:
     """Отправить решение на проверку (Студент)"""
     pass
 
@@ -227,18 +225,18 @@ def create_submission(
     responses={"401": {"model": ErrorResponse}, "404": {"model": ErrorResponse}},
     tags=["Submissions"],
 )
-def get_submission(id: UUID) -> Union[Submission, ErrorResponse]:
+def get_submission(id: UUID) -> Submission | ErrorResponse:
     """Получить информацию о решении по ID"""
     pass
 
 
 @app.get(
     "/api/v1/submissions/{id}/artifacts",
-    response_model=List[Artifact],
+    response_model=list[Artifact],
     responses={"401": {"model": ErrorResponse}, "404": {"model": ErrorResponse}},
     tags=["Submissions"],
 )
-def get_submission_artifacts(id: UUID) -> Union[List[Artifact], ErrorResponse]:
+def get_submission_artifacts(id: UUID) -> list[Artifact] | ErrorResponse:
     """Получить артефакты решения"""
     pass
 
@@ -250,11 +248,11 @@ def get_submission_artifacts(id: UUID) -> Union[List[Artifact], ErrorResponse]:
 
 @app.get(
     "/api/v1/submissions/{id}/reviews",
-    response_model=List[Review],
+    response_model=list[Review],
     responses={"401": {"model": ErrorResponse}, "404": {"model": ErrorResponse}},
     tags=["Reviews"],
 )
-def get_submission_reviews(id: UUID) -> Union[List[Review], ErrorResponse]:
+def get_submission_reviews(id: UUID) -> list[Review] | ErrorResponse:
     """Получить отзыв/результат проверки для конкретного решения"""
     pass
 
@@ -271,10 +269,10 @@ def get_submission_reviews(id: UUID) -> Union[List[Review], ErrorResponse]:
     tags=["Reviews"],
 )
 def create_submission_review(
-    idempotency__key: UUID = Header(..., alias="Idempotency-Key"),
+    idempotency_key: UUID = Header(..., alias="Idempotency-Key"),
     id: UUID = ...,
     body: ReviewCreate = ...,
-) -> Union[Review, ErrorResponse]:
+) -> Review | ErrorResponse:
     """Создать отзыв/оценку к решению"""
     pass
 
@@ -291,6 +289,6 @@ def create_submission_review(
 )
 def update_submission_review(
     id: UUID, body: ReviewUpdate = ...
-) -> Union[Review, ErrorResponse]:
+) -> Review | ErrorResponse:
     """Изменить существующий отзыв/оценку"""
     pass

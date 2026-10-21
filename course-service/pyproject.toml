@@ -57,7 +57,22 @@ show_missing = true
 fail_under = 80
 
 [tool.ruff.lint]
+extend-select = ["I", "UP", "F", "B"]
+ignore = ["PIE790"]
 fixable = ["I", "UP", "F401"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Header",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Body",
+    "fastapi.Depends",
+    "fastapi.Security",
+    "fastapi.Cookie",
+    "fastapi.Form",
+    "fastapi.File",
+]
 
 [tool.mypy]
 strict = true

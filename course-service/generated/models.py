@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from datetime import date
 from enum import Enum
-from typing import Annotated, List, Optional
+from typing import Annotated
 from uuid import UUID
 
 from pydantic import AnyUrl, AwareDatetime, BaseModel, Field
@@ -45,13 +45,13 @@ class CourseCreate(BaseModel):
 
 class CourseUpdate(BaseModel):
     title: Annotated[
-        Optional[str],
+        str | None,
         Field(
             examples=["Продвинутый Backend на Python"], max_length=255, min_length=15
         ),
     ] = None
     description: Annotated[
-        Optional[str],
+        str | None,
         Field(
             examples=[
                 "Углубленный курс по асинхронному программированию и оптимизации БД."
@@ -61,9 +61,9 @@ class CourseUpdate(BaseModel):
         ),
     ] = None
     teacher_id: Annotated[
-        Optional[UUID], Field(examples=["22222222-2222-2222-2222-222222222222"])
+        UUID | None, Field(examples=["22222222-2222-2222-2222-222222222222"])
     ] = None
-    status: Annotated[Optional[Status], Field(examples=["CLOSED"])] = None
+    status: Annotated[Status | None, Field(examples=["CLOSED"])] = None
 
 
 class Course(CourseCreate):
@@ -96,7 +96,7 @@ class AssignmentCreate(BaseModel):
         date, Field(description="Дедлайн сдачи задания", examples=["2026-10-20"])
     ]
     materials_url: Annotated[
-        Optional[AnyUrl],
+        AnyUrl | None,
         Field(
             description="Ссылка на методические материалы",
             examples=["https://university.com/materials/lab2.pdf"],
@@ -106,16 +106,16 @@ class AssignmentCreate(BaseModel):
 
 class AssignmentUpdate(BaseModel):
     title: Annotated[
-        Optional[str], Field(examples=["Лабораторная работа №2 (обновленная)"])
+        str | None, Field(examples=["Лабораторная работа №2 (обновленная)"])
     ] = None
     description: Annotated[
-        Optional[str], Field(examples=["Добавлены требования к покрытию тестами"])
+        str | None, Field(examples=["Добавлены требования к покрытию тестами"])
     ] = None
-    attempts_limit: Annotated[Optional[int], Field(examples=[5], ge=3, le=10)] = None
-    date_start: Annotated[Optional[date], Field(examples=["2026-10-02"])] = None
-    date_end: Annotated[Optional[date], Field(examples=["2026-10-25"])] = None
+    attempts_limit: Annotated[int | None, Field(examples=[5], ge=3, le=10)] = None
+    date_start: Annotated[date | None, Field(examples=["2026-10-02"])] = None
+    date_end: Annotated[date | None, Field(examples=["2026-10-25"])] = None
     materials_url: Annotated[
-        Optional[AnyUrl],
+        AnyUrl | None,
         Field(examples=["https://university.com/materials/lab2_v2.pdf"]),
     ] = None
 
@@ -149,14 +149,14 @@ class Submission(BaseModel):
     ]
     submitted_at: Annotated[AwareDatetime, Field(examples=["2026-10-15T18:24:01Z"])]
     review_id: Annotated[
-        Optional[UUID],
+        UUID | None,
         Field(
             description="ID связанной проверки (заполняется после ревью преподавателем)",
             examples=["cccccccc-cccc-cccc-cccc-cccccccccccc"],
         ),
     ] = None
     auto_review_id: Annotated[
-        Optional[UUID],
+        UUID | None,
         Field(
             description="ID автоматической проверки (если запускались тесты)",
             examples=["bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"],
@@ -167,7 +167,7 @@ class Submission(BaseModel):
     ]
     status: Annotated[Status2, Field(examples=["SUBMITTED"])]
     artifacts_url: Annotated[
-        Optional[AnyUrl],
+        AnyUrl | None,
         Field(
             description="Ссылка на артефакты решения",
             examples=["https://storage.university.com/artifacts/lab2/student1.zip"],
@@ -204,11 +204,11 @@ class ReviewCreate(BaseModel):
 
 class ReviewUpdate(BaseModel):
     feedback: Annotated[
-        Optional[str],
+        str | None,
         Field(examples=["Исправлено: обработка 409 добавлена, оценка повышена."]),
     ] = None
-    mark: Annotated[Optional[float], Field(examples=[10.0], ge=0.0, le=10.0)] = None
-    status: Annotated[Optional[Status3], Field(examples=["PASSED"])] = None
+    mark: Annotated[float | None, Field(examples=[10.0], ge=0.0, le=10.0)] = None
+    status: Annotated[Status3 | None, Field(examples=["PASSED"])] = None
 
 
 class Review(ReviewCreate):
@@ -240,10 +240,10 @@ class ErrorResponse(BaseModel):
 
 
 class ApiV1CoursesGetResponse(BaseModel):
-    data: List[Course]
+    data: list[Course]
     pagination: Pagination
 
 
 class ApiV1AssignmentsGetResponse(BaseModel):
-    data: List[Assignment]
+    data: list[Assignment]
     pagination: Pagination
