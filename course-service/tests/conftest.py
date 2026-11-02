@@ -2,9 +2,9 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.core.config import Settings, get_settings
-from src.web.app import create_app
-from src.web.routers import service_router
+from course_service.core.config import Settings, get_settings
+from course_service.web.api.v1 import service_router
+from course_service.web.app import create_app
 
 
 @pytest.fixture

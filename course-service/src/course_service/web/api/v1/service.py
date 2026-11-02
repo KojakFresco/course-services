@@ -1,12 +1,9 @@
-import logging
-
 from fastapi import APIRouter
 
-from src.core.services import get_service_info
-from src.web.lifespans import lifespan_service_router
-from src.web.schemas import ServiceInfo
+from course_service.core.services import get_service_info
+from course_service.web.lifespans import lifespan_service_router
+from course_service.web.schemas.base_schemas import ServiceInfo
 
-logger = logging.getLogger(__name__)
 service_router = APIRouter(
     prefix="/service", lifespan=lifespan_service_router, tags=["service"]
 )

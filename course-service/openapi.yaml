@@ -347,7 +347,7 @@ paths:
   # =========================================================================
   # 4. REVIEWS
   # =========================================================================
-  /api/v1/submissions/{id}/reviews:
+  /api/v1/submissions/{id}/review:
     get:
       tags: [Reviews]
       summary: Получить отзыв/результат проверки для конкретного решения
@@ -361,9 +361,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Review'
+                $ref: '#/components/schemas/Review'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
