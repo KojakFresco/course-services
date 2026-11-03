@@ -1,15 +1,14 @@
 from datetime import UTC, datetime
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 
-from course_service.repositories import AssignmentRepository, IdempotencyRepository
-from course_service.repositories.container import RepositoryContainer
+from course_service.repositories import AssignmentRepository
+from course_service.services.assignments import AssignmentService
 from course_service.web.dependencies import (
     get_assignment_repository,
-    get_idempotency_repository,
-    get_repositories,
+    get_assignment_service,
 )
 from course_service.web.schemas.assignments import (
     Assignment,
@@ -53,26 +52,9 @@ async def list_assignments(
 async def create_assignment(
     body: AssignmentCreate,
     idempotency_key: Annotated[UUID, Header(alias="Idempotency-Key")],
-    repositories: Annotated[RepositoryContainer, Depends(get_repositories)],
-    idempotency: Annotated[IdempotencyRepository, Depends(get_idempotency_repository)],
+    service: Annotated[AssignmentService, Depends(get_assignment_service)],
 ) -> Assignment:
-    if await repositories.courses.get(body.course_id) is None:
-        raise HTTPException(400, "Course not found")
-    key = str(idempotency_key)
-    async with repositories.assignment_create_lock:
-        existing_id = await idempotency.get("create_assignment", key)
-        if existing_id is not None:
-            existing = await repositories.assignments.get(existing_id)
-            if existing is None:
-                raise HTTPException(500, "Invalid idempotency reference")
-            return existing
-        now = datetime.now(UTC)
-        assignment = Assignment(
-            id=uuid4(), created_at=now, updated_at=now, **body.model_dump()
-        )
-        await repositories.assignments.create(assignment)
-        await idempotency.save("create_assignment", key, assignment.id)
-        return assignment
+    return await service.create(body, idempotency_key)
 
 
 @assignments_router.get(

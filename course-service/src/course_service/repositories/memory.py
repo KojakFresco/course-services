@@ -13,4 +13,4 @@ class InMemoryStore:
         self.submissions: dict[UUID, Submission] = {}
         self.reviews: dict[UUID, Review] = {}
         self.reviews_by_submission: dict[UUID, list[UUID]] = {}
-        self.idempotency_keys: dict[str, UUID] = {}
+        self.idempotency_keys: dict[tuple[str, str], UUID] = {}

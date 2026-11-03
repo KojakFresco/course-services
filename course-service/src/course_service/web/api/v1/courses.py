@@ -1,15 +1,14 @@
 from datetime import UTC, datetime
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 
-from course_service.repositories import CourseRepository, IdempotencyRepository
-from course_service.repositories.container import RepositoryContainer
+from course_service.repositories import CourseRepository
+from course_service.services.courses import CourseService
 from course_service.web.dependencies import (
     get_course_repository,
-    get_idempotency_repository,
-    get_repositories,
+    get_course_service,
 )
 from course_service.web.schemas.base_schemas import Pagination
 from course_service.web.schemas.courses import (
@@ -51,22 +50,9 @@ async def list_courses(
 async def create_course(
     body: CourseCreate,
     idempotency_key: Annotated[UUID, Header(alias="Idempotency-Key")],
-    repositories: Annotated[RepositoryContainer, Depends(get_repositories)],
-    idempotency: Annotated[IdempotencyRepository, Depends(get_idempotency_repository)],
+    service: Annotated[CourseService, Depends(get_course_service)],
 ) -> Course:
-    key = str(idempotency_key)
-    async with repositories.course_create_lock:
-        existing_id = await idempotency.get("create_course", key)
-        if existing_id is not None:
-            existing = await repositories.courses.get(existing_id)
-            if existing is None:
-                raise HTTPException(500, "Invalid idempotency reference")
-            return existing
-        now = datetime.now(UTC)
-        course = Course(id=uuid4(), created_at=now, updated_at=now, **body.model_dump())
-        await repositories.courses.create(course)
-        await idempotency.save("create_course", key, course.id)
-        return course
+    return await service.create(body, idempotency_key)
 
 
 @courses_router.get(

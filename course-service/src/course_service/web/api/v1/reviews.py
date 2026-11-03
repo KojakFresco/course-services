@@ -1,15 +1,16 @@
 from datetime import UTC, datetime
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 
-from course_service.repositories import IdempotencyRepository, ReviewRepository
+from course_service.repositories import ReviewRepository
 from course_service.repositories.container import RepositoryContainer
+from course_service.services.reviews import ReviewService
 from course_service.web.dependencies import (
-    get_idempotency_repository,
     get_repositories,
     get_review_repository,
+    get_review_service,
 )
 from course_service.web.schemas.errors import ErrorResponse
 from course_service.web.schemas.reviews import Review, ReviewCreate, ReviewUpdate
@@ -49,24 +50,9 @@ async def create_submission_review(
     id: UUID,
     body: ReviewCreate,
     idempotency_key: Annotated[UUID, Header(alias="Idempotency-Key")],
-    repositories: Annotated[RepositoryContainer, Depends(get_repositories)],
-    idempotency: Annotated[IdempotencyRepository, Depends(get_idempotency_repository)],
+    service: Annotated[ReviewService, Depends(get_review_service)],
 ) -> Review:
-    key = str(idempotency_key)
-    async with repositories.review_create_lock:
-        existing_id = await idempotency.get("create_review", key)
-        if existing_id is not None:
-            existing = await repositories.reviews.get(existing_id)
-            if existing is None:
-                raise HTTPException(500, "Invalid idempotency reference")
-            return existing
-        if await repositories.submissions.get(id) is None:
-            raise HTTPException(404, "Submission not found")
-        now = datetime.now(UTC)
-        review = Review(id=uuid4(), created_at=now, updated_at=now, **body.model_dump())
-        await repositories.reviews.create(id, review)
-        await idempotency.save("create_review", key, review.id)
-        return review
+    return await service.create(id, body, idempotency_key)
 
 
 @reviews_router.patch(

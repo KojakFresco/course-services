@@ -1,5 +1,3 @@
-import asyncio
-
 from course_service.repositories import (
     AssignmentRepository,
     CourseRepository,
@@ -8,6 +6,12 @@ from course_service.repositories import (
     ReviewRepository,
     SubmissionRepository,
 )
+from course_service.repositories.locks import KeyedLockRegistry
+from course_service.services.assignments import AssignmentService
+from course_service.services.courses import CourseService
+from course_service.services.idempotency import IdempotencyService
+from course_service.services.reviews import ReviewService
+from course_service.services.submissions import SubmissionService
 
 
 class RepositoryContainer:
@@ -19,7 +23,17 @@ class RepositoryContainer:
         self.submissions = SubmissionRepository(store)
         self.reviews = ReviewRepository(store)
         self.idempotency = IdempotencyRepository(store)
-        self.course_create_lock = asyncio.Lock()
-        self.assignment_create_lock = asyncio.Lock()
-        self.submission_create_lock = asyncio.Lock()
-        self.review_create_lock = asyncio.Lock()
+        self.idempotency_locks = KeyedLockRegistry()
+        idempotency_service = IdempotencyService(
+            self.idempotency, self.idempotency_locks
+        )
+        self.course_service = CourseService(self.courses, idempotency_service)
+        self.assignment_service = AssignmentService(
+            self.assignments, self.courses, idempotency_service
+        )
+        self.submission_service = SubmissionService(
+            self.submissions, self.assignments, idempotency_service
+        )
+        self.review_service = ReviewService(
+            self.reviews, self.submissions, idempotency_service
+        )

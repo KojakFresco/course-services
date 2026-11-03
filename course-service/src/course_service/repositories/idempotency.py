@@ -11,8 +11,8 @@ class IdempotencyRepository:
 
     async def get(self, operation: str, key: str) -> UUID | None:
         async with self._lock:
-            return self._store.idempotency_keys.get(f"{operation}:{key}")
+            return self._store.idempotency_keys.get((operation, key))
 
     async def save(self, operation: str, key: str, entity_id: UUID) -> None:
         async with self._lock:
-            self._store.idempotency_keys[f"{operation}:{key}"] = entity_id
+            self._store.idempotency_keys[(operation, key)] = entity_id
