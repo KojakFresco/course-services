@@ -32,6 +32,25 @@ class SubmissionRepository:
             self._store.submissions[submission.id] = submission
             return submission
 
+    async def attach_review(
+        self,
+        submission_id: UUID,
+        review_id: UUID,
+        review_type: str,
+    ) -> Submission | None:
+        async with self._lock.write_lock():
+            submission = self._store.submissions.get(submission_id)
+            if submission is None:
+                return None
+
+            if review_type == "manual":
+                submission.review_id = review_id
+            else:
+                submission.auto_review_id = review_id
+
+            self._store.submissions[submission_id] = submission
+            return submission
+
     async def get_artifacts(self, submission_id: UUID) -> list[Artifact]:
         async with self._lock.read_lock():
             submission = self._store.submissions.get(submission_id)

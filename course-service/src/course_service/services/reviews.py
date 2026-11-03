@@ -28,10 +28,17 @@ class ReviewService:
 
         async def create_review() -> Review:
             now = datetime.now(UTC)
-            return await self._repository.create(
-                submission_id,
-                Review(id=uuid4(), created_at=now, updated_at=now, **body.model_dump()),
+            review = await self._repository.create(
+                Review(id=uuid4(), created_at=now, updated_at=now, **body.model_dump())
             )
+            linked_submission = await self._submissions.attach_review(
+                submission_id,
+                review.id,
+                body.type.value,
+            )
+            if linked_submission is None:
+                raise RuntimeError("Submission disappeared while creating review")
+            return review
 
         return await self._idempotency.execute(
             operation="create_review",

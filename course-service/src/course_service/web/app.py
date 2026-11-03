@@ -6,8 +6,8 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import Lifespan
 
+from course_service.application.container import ApplicationContainer
 from course_service.core.config import Settings
-from course_service.repositories.container import RepositoryContainer
 from course_service.web.handlers import (
     http_exception_handler,
     unexpected_exception_handler,
@@ -30,7 +30,9 @@ def create_app(
     app_params = {**settings.app.model_dump(), **params}
     app = FastAPI(**app_params)
 
-    app.state.repositories = RepositoryContainer()
+    app.state.application = ApplicationContainer()
+    app.state.storage_backend = settings.storage_backend
+    app.state.max_page_size = settings.max_page_size
 
     app.add_exception_handler(
         StarletteHTTPException,

@@ -1,5 +1,5 @@
 import functools
-from typing import final
+from typing import Literal, final
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -17,6 +17,8 @@ class AppSettings(BaseSettings):
 @final
 class Settings(BaseSettings):
     app: AppSettings
+    storage_backend: Literal["memory"] = "memory"
+    max_page_size: int = 100
 
     model_config = SettingsConfigDict(
         extra="allow",

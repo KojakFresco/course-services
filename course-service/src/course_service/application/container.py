@@ -14,14 +14,14 @@ from course_service.services.reviews import ReviewService
 from course_service.services.submissions import SubmissionService
 
 
-class RepositoryContainer:
+class ApplicationContainer:
     def __init__(self) -> None:
         store = InMemoryStore()
 
         self.courses = CourseRepository(store)
         self.assignments = AssignmentRepository(store)
         self.submissions = SubmissionRepository(store)
-        self.reviews = ReviewRepository(store)
+        self.reviews = ReviewRepository(store, self.submissions)
         self.idempotency = IdempotencyRepository(store)
         self.idempotency_locks = KeyedLockRegistry()
         idempotency_service = IdempotencyService(
