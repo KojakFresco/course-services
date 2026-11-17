@@ -1,15 +1,10 @@
-from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header
 
-from course_service.application.container import ApplicationContainer
-from course_service.repositories import ReviewRepository
-from course_service.services.reviews import ReviewService
+from course_service.application.services.reviews import ReviewService
 from course_service.web.dependencies import (
-    get_application,
-    get_review_repository,
     get_review_service,
 )
 from course_service.web.schemas.errors import ErrorResponse
@@ -25,15 +20,9 @@ reviews_router = APIRouter(prefix="/api/v1/submissions/{id}/review", tags=["Revi
 )
 async def get_submission_review(
     id: UUID,
-    application: Annotated[ApplicationContainer, Depends(get_application)],
-    repository: Annotated[ReviewRepository, Depends(get_review_repository)],
+    service: Annotated[ReviewService, Depends(get_review_service)],
 ) -> Review:
-    if await application.submissions.get(id) is None:
-        raise HTTPException(404, "Submission not found")
-    review = await repository.get_for_submission(id)
-    if review is None:
-        raise HTTPException(404, "Review not found")
-    return review
+    return await service.get_for_submission(id)
 
 
 @reviews_router.post(
@@ -67,14 +56,6 @@ async def create_submission_review(
 async def update_submission_review(
     id: UUID,
     body: ReviewUpdate,
-    application: Annotated[ApplicationContainer, Depends(get_application)],
-    repository: Annotated[ReviewRepository, Depends(get_review_repository)],
+    service: Annotated[ReviewService, Depends(get_review_service)],
 ) -> Review:
-    if await application.submissions.get(id) is None:
-        raise HTTPException(404, "Submission not found")
-    review = await repository.get_for_submission(id)
-    if review is None:
-        raise HTTPException(404, "Review not found")
-    updated = review.model_copy(update=body.model_dump(exclude_unset=True), deep=True)
-    updated.updated_at = datetime.now(UTC)
-    return await repository.update(updated)
+    return await service.update(id, body)

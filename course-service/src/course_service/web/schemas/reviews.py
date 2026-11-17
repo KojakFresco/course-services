@@ -30,10 +30,13 @@ class ReviewCreate(BaseSchemaModel):
 class ReviewUpdate(BaseSchemaModel):
     feedback: Annotated[
         str | None,
-        Field(examples=["Исправлено: обработка 409 добавлена, оценка повышена."]),
-    ] = None
-    mark: Annotated[float | None, Field(examples=[10.0], ge=0.0, le=10.0)] = None
-    status: Annotated[ReviewStatus | None, Field(examples=["PASSED"])] = None
+        Field(
+            default=None,
+            examples=["Исправлено: обработка 409 добавлена, оценка повышена."],
+        ),
+    ]
+    mark: Annotated[float | None, Field(default=None, examples=[10.0], ge=0.0, le=10.0)]
+    status: Annotated[ReviewStatus | None, Field(default=None, examples=["PASSED"])]
 
 
 class Review(ReviewCreate):

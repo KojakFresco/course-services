@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 T = TypeVar("T")
 
 
 @dataclass(frozen=True)
-class Page(Generic[T]):
+class Page[T]:
     items: list[T]
     total: int
     offset: int

@@ -33,10 +33,11 @@ class AssignmentCreate(BaseSchemaModel):
     materials_url: Annotated[
         AnyUrl | None,
         Field(
+            default=None,
             description="Ссылка на методические материалы",
             examples=["https://university.com/materials/lab2.pdf"],
         ),
-    ] = None
+    ]
 
 
 class AssignmentUpdate(BaseSchemaModel):
@@ -46,9 +47,11 @@ class AssignmentUpdate(BaseSchemaModel):
     description: Annotated[
         str | None, Field(examples=["Добавлены требования к покрытию тестами"])
     ] = None
-    attempts_limit: Annotated[int | None, Field(examples=[5], ge=3, le=10)] = None
-    date_start: Annotated[date | None, Field(examples=["2026-10-02"])] = None
-    date_end: Annotated[date | None, Field(examples=["2026-10-25"])] = None
+    attempts_limit: Annotated[
+        int | None, Field(default=None, examples=[5], ge=3, le=10)
+    ]
+    date_start: Annotated[date | None, Field(default=None, examples=["2026-10-02"])]
+    date_end: Annotated[date | None, Field(default=None, examples=["2026-10-25"])]
     materials_url: Annotated[
         AnyUrl | None,
         Field(examples=["https://university.com/materials/lab2_v2.pdf"]),

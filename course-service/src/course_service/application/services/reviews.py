@@ -1,20 +1,24 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from fastapi import HTTPException
-
-from course_service.repositories.reviews import ReviewRepository
-from course_service.repositories.submissions import SubmissionRepository
-from course_service.services.idempotency import IdempotencyService
-from course_service.web.schemas.reviews import Review, ReviewCreate
+from course_service.application.errors import (
+    ReviewNotFoundError,
+    SubmissionNotFoundError,
+)
+from course_service.application.ports import (
+    IdempotencyPort,
+    ReviewRepositoryPort,
+    SubmissionRepositoryPort,
+)
+from course_service.web.schemas.reviews import Review, ReviewCreate, ReviewUpdate
 
 
 class ReviewService:
     def __init__(
         self,
-        repository: ReviewRepository,
-        submissions: SubmissionRepository,
-        idempotency: IdempotencyService,
+        repository: ReviewRepositoryPort,
+        submissions: SubmissionRepositoryPort,
+        idempotency: IdempotencyPort,
     ) -> None:
         self._repository = repository
         self._submissions = submissions
@@ -24,7 +28,7 @@ class ReviewService:
         self, submission_id: UUID, body: ReviewCreate, key: UUID
     ) -> Review:
         if await self._submissions.get(submission_id) is None:
-            raise HTTPException(404, "Submission not found")
+            raise SubmissionNotFoundError
 
         async def create_review() -> Review:
             now = datetime.now(UTC)
@@ -47,3 +51,19 @@ class ReviewService:
             create=create_review,
             get_id=lambda review: review.id,
         )
+
+    async def get_for_submission(self, submission_id: UUID) -> Review:
+        if await self._submissions.get(submission_id) is None:
+            raise SubmissionNotFoundError
+        review = await self._repository.get_for_submission(submission_id)
+        if review is None:
+            raise ReviewNotFoundError
+        return review
+
+    async def update(self, submission_id: UUID, body: ReviewUpdate) -> Review:
+        review = await self.get_for_submission(submission_id)
+        updated = review.model_copy(
+            update=body.model_dump(exclude_unset=True), deep=True
+        )
+        updated.updated_at = datetime.now(UTC)
+        return await self._repository.update(updated)

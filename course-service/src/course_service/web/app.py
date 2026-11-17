@@ -7,8 +7,17 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import Lifespan
 
 from course_service.application.container import ApplicationContainer
+from course_service.application.errors import (
+    ApplicationNotConfiguredError,
+    AssignmentNotFoundError,
+    CourseNotFoundError,
+    ReviewNotFoundError,
+    SubmissionAttemptsLimitExceededError,
+    SubmissionNotFoundError,
+)
 from course_service.core.config import Settings
 from course_service.web.handlers import (
+    application_error_handler,
     http_exception_handler,
     unexpected_exception_handler,
     validation_exception_handler,
@@ -46,6 +55,15 @@ def create_app(
         Exception,
         unexpected_exception_handler,
     )
+    for application_error in (
+        CourseNotFoundError,
+        AssignmentNotFoundError,
+        SubmissionNotFoundError,
+        ReviewNotFoundError,
+        SubmissionAttemptsLimitExceededError,
+        ApplicationNotConfiguredError,
+    ):
+        app.add_exception_handler(application_error, application_error_handler)
 
     app.middleware("http")(correlation_middleware)
     for router in routers:

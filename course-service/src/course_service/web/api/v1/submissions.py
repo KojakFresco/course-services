@@ -1,12 +1,12 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, Header
 
-from course_service.repositories import SubmissionRepository
-from course_service.services.submissions import SubmissionService
+from course_service.application.container import ApplicationContainer
+from course_service.application.services.submissions import SubmissionService
 from course_service.web.dependencies import (
-    get_submission_repository,
+    get_application,
     get_submission_service,
 )
 from course_service.web.schemas.errors import ErrorResponse
@@ -33,8 +33,12 @@ async def create_submission(
     body: SubmissionCreate,
     idempotency_key: Annotated[UUID, Header(alias="Idempotency-Key")],
     service: Annotated[SubmissionService, Depends(get_submission_service)],
+    application: Annotated[ApplicationContainer, Depends(get_application)],
+    background_tasks: BackgroundTasks,
 ) -> Submission:
-    return await service.create(body, idempotency_key)
+    submission = await service.create(body, idempotency_key)
+    background_tasks.add_task(application.outbox_dispatcher.publish_pending)
+    return submission
 
 
 @submissions_router.get(
@@ -44,12 +48,9 @@ async def create_submission(
 )
 async def get_submission(
     id: UUID,
-    repository: Annotated[SubmissionRepository, Depends(get_submission_repository)],
+    service: Annotated[SubmissionService, Depends(get_submission_service)],
 ) -> Submission:
-    submission = await repository.get(id)
-    if submission is None:
-        raise HTTPException(404, "Submission not found")
-    return submission
+    return await service.get(id)
 
 
 @submissions_router.get(
@@ -59,8 +60,6 @@ async def get_submission(
 )
 async def get_submission_artifacts(
     id: UUID,
-    repository: Annotated[SubmissionRepository, Depends(get_submission_repository)],
+    service: Annotated[SubmissionService, Depends(get_submission_service)],
 ) -> list[Artifact]:
-    if await repository.get(id) is None:
-        raise HTTPException(404, "Submission not found")
-    return await repository.get_artifacts(id)
+    return await service.get_artifacts(id)

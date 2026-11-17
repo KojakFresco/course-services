@@ -2,8 +2,8 @@ from collections.abc import Awaitable, Callable
 from typing import TypeVar
 from uuid import UUID
 
-from course_service.repositories.idempotency import IdempotencyRepository
-from course_service.repositories.locks import KeyedLockRegistry
+from course_service.application.ports import IdempotencyRepositoryPort
+from course_service.infrastructure.persistence.repositories import KeyedLockRegistry
 
 T = TypeVar("T")
 
@@ -11,7 +11,7 @@ T = TypeVar("T")
 class IdempotencyService:
     def __init__(
         self,
-        repository: IdempotencyRepository,
+        repository: IdempotencyRepositoryPort,
         locks: KeyedLockRegistry,
     ) -> None:
         self._repository = repository

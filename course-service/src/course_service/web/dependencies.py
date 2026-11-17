@@ -3,22 +3,27 @@ from typing import Annotated
 from fastapi import Depends, Request
 
 from course_service.application.container import ApplicationContainer
-from course_service.repositories.assignments import AssignmentRepository
-from course_service.repositories.courses import CourseRepository
-from course_service.repositories.idempotency import IdempotencyRepository
-from course_service.repositories.reviews import ReviewRepository
-from course_service.repositories.submissions import SubmissionRepository
-from course_service.services.assignments import AssignmentService
-from course_service.services.courses import CourseService
-from course_service.services.reviews import ReviewService
-from course_service.services.submissions import SubmissionService
+from course_service.application.errors import ApplicationNotConfiguredError
+from course_service.application.services import CourseService
+from course_service.application.services.assignments import AssignmentService
+from course_service.application.services.reviews import ReviewService
+from course_service.application.services.submissions import SubmissionService
+from course_service.infrastructure.persistence.repositories import (
+    AssignmentRepository,
+    CourseRepository,
+    IdempotencyRepository,
+    ReviewRepository,
+)
+from course_service.infrastructure.persistence.repositories.submissions import (
+    SubmissionRepository,
+)
 
 
 def get_application(request: Request) -> ApplicationContainer:
     application = getattr(request.app.state, "application", None)
 
     if not isinstance(application, ApplicationContainer):
-        raise RuntimeError("ApplicationContainer is not configured")
+        raise ApplicationNotConfiguredError("ApplicationContainer is not configured")
 
     return application
 

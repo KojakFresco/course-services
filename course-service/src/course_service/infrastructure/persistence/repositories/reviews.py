@@ -1,8 +1,10 @@
 from uuid import UUID
 
-from course_service.repositories.locks import ReadWriteLock
-from course_service.repositories.memory import InMemoryStore
-from course_service.repositories.submissions import SubmissionRepository
+from course_service.infrastructure.persistence.repositories.locks import ReadWriteLock
+from course_service.infrastructure.persistence.repositories.submissions import (
+    SubmissionRepository,
+)
+from course_service.infrastructure.persistence.store import InMemoryStore
 from course_service.web.schemas.reviews import Review
 
 

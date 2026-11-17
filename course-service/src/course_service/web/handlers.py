@@ -5,6 +5,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from course_service.application.errors import (
+    AssignmentNotFoundError,
+    CourseNotFoundError,
+    ReviewNotFoundError,
+    SubmissionAttemptsLimitExceededError,
+    SubmissionNotFoundError,
+)
+
 
 def request_id_from(request: Request) -> UUID:
     return UUID(request.state.request_id)
@@ -71,4 +79,23 @@ async def unexpected_exception_handler(
         code="INTERNAL_SERVER_ERROR",
         message="Internal server error",
         status=500,
+    )
+
+
+async def application_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    if isinstance(exc, CourseNotFoundError):
+        status = 404
+    elif isinstance(exc, AssignmentNotFoundError):
+        status = 400
+    elif isinstance(exc, SubmissionNotFoundError | ReviewNotFoundError):
+        status = 404
+    elif isinstance(exc, SubmissionAttemptsLimitExceededError):
+        status = 409
+    else:
+        status = 500
+    return error_response(
+        request,
+        code=type(exc).__name__.upper(),
+        message=str(exc) or type(exc).__name__,
+        status=status,
     )

@@ -42,23 +42,28 @@ class CourseUpdate(BaseSchemaModel):
     title: Annotated[
         str | None,
         Field(
-            examples=["Продвинутый Backend на Python"], max_length=255, min_length=15
+            default=None,
+            examples=["Продвинутый Backend на Python"],
+            max_length=255,
+            min_length=15,
         ),
-    ] = None
+    ]
     description: Annotated[
         str | None,
         Field(
+            default=None,
             examples=[
                 "Углубленный курс по асинхронному программированию и оптимизации БД."
             ],
             max_length=4056,
             min_length=32,
         ),
-    ] = None
+    ]
     teacher_id: Annotated[
-        UUID | None, Field(examples=["22222222-2222-2222-2222-222222222222"])
-    ] = None
-    status: Annotated[CourseStatus | None, Field(examples=["CLOSED"])] = None
+        UUID | None,
+        Field(default=None, examples=["22222222-2222-2222-2222-222222222222"]),
+    ]
+    status: Annotated[CourseStatus | None, Field(default=None, examples=["CLOSED"])]
 
 
 class Course(CourseCreate):

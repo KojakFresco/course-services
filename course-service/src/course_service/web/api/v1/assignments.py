@@ -1,11 +1,10 @@
-from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, Query
 
-from course_service.repositories import AssignmentRepository
-from course_service.services.assignments import AssignmentService
+from course_service.application.services.assignments import AssignmentService
+from course_service.infrastructure.persistence.repositories import AssignmentRepository
 from course_service.web.dependencies import (
     get_assignment_repository,
     get_assignment_service,
@@ -64,12 +63,9 @@ async def create_assignment(
 )
 async def get_assignment(
     id: UUID,
-    repository: Annotated[AssignmentRepository, Depends(get_assignment_repository)],
+    service: Annotated[AssignmentService, Depends(get_assignment_service)],
 ) -> Assignment:
-    assignment = await repository.get(id)
-    if assignment is None:
-        raise HTTPException(404, "Assignment not found")
-    return assignment
+    return await service.get(id)
 
 
 @assignments_router.patch(
@@ -85,16 +81,9 @@ async def get_assignment(
 async def update_assignment(
     id: UUID,
     body: AssignmentUpdate,
-    repository: Annotated[AssignmentRepository, Depends(get_assignment_repository)],
+    service: Annotated[AssignmentService, Depends(get_assignment_service)],
 ) -> Assignment:
-    assignment = await repository.get(id)
-    if assignment is None:
-        raise HTTPException(404, "Assignment not found")
-    updated = assignment.model_copy(
-        update=body.model_dump(exclude_unset=True), deep=True
-    )
-    updated.updated_at = datetime.now(UTC)
-    return await repository.update(updated)
+    return await service.update(id, body)
 
 
 @assignments_router.delete(
@@ -108,7 +97,6 @@ async def update_assignment(
 )
 async def delete_assignment(
     id: UUID,
-    repository: Annotated[AssignmentRepository, Depends(get_assignment_repository)],
+    service: Annotated[AssignmentService, Depends(get_assignment_service)],
 ) -> None:
-    if not await repository.delete(id):
-        raise HTTPException(404, "Assignment not found")
+    await service.delete(id)

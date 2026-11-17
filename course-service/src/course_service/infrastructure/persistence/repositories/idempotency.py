@@ -1,7 +1,7 @@
 import asyncio
 from uuid import UUID
 
-from course_service.repositories.memory import InMemoryStore
+from course_service.infrastructure.persistence.store import InMemoryStore
 
 
 class IdempotencyRepository:
